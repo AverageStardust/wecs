@@ -14,7 +14,7 @@ type Store struct {
 	ArchetypeMap map[uint64]archetypeId
 	Parts        map[Part]struct{}
 	Entries      map[EntityId]entry
-	Mutex        sync.Mutex
+	Mutex        sync.Locker
 	NextEntity   EntityId
 	NextTag      PartId
 	Pages        map[archetypeId]*Page
@@ -34,7 +34,7 @@ func NewStore() *Store {
 		Parts:        map[Part]struct{}{},
 		Entries:      map[EntityId]entry{},
 		Pages:        map[archetypeId]*Page{},
-		Mutex:        sync.Mutex{},
+		Mutex:        &sync.Mutex{},
 		NextEntity:   0,
 		Resources:    map[ResourceId]any{},
 	}

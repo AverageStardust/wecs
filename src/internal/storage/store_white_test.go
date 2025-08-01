@@ -254,7 +254,7 @@ func newTestStore(entries map[EntityId]entry, Pages map[archetypeId]*Page, nextE
 		},
 		Entries:    entries,
 		Pages:      Pages,
-		Mutex:      sync.Mutex{},
+		Mutex:      &sync.Mutex{},
 		NextEntity: nextEntity,
 		Resources:  map[ResourceId]any{},
 	}
