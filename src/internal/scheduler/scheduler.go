@@ -64,7 +64,14 @@ func (scheduler *Scheduler) RunSystems(store *storage.Store) bool {
 	}
 }
 
-func (scheduler *Scheduler) NewSchedule(maxFrequency int, minFrequency int) *Schedule {
+func (scheduler *Scheduler) NewSchedule(frequency int) *Schedule {
+	schedule := NewSchedule(frequency, frequency)
+	scheduler.Schedules = append(scheduler.Schedules, schedule)
+
+	return schedule
+}
+
+func (scheduler *Scheduler) NewVariableSchedule(maxFrequency int, minFrequency int) *Schedule {
 	schedule := NewSchedule(maxFrequency, minFrequency)
 	scheduler.Schedules = append(scheduler.Schedules, schedule)
 

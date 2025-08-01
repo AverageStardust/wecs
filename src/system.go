@@ -18,23 +18,23 @@ type systemState[T any] struct {
 	state *T
 }
 
-type systemCallback[T any] func(entity *Access, state *T, delta time.Duration, runtime time.Duration)
+type systemCallback[T any] func(access *Access, state *T, delta time.Duration, runtime time.Duration)
 
 var systemCallbacks []reflect.Value
-
-func (system systemState[T]) Run(systemId scheduler.SystemId, store *storage.Store, delta, runtime time.Duration) {
-	callback := systemCallbacks[systemId].Interface().(systemCallback[T])
-
-	entity := newAccess(store)
-	callback(entity, system.state, delta, runtime)
-	entity.Close()
-}
 
 func NewSystem[T any](callback systemCallback[T]) System[T] {
 	systemId := System[T](len(systemCallbacks))
 	systemCallbacks = append(systemCallbacks, reflect.ValueOf(callback))
 
 	return systemId
+}
+
+func (system systemState[T]) Run(systemId scheduler.SystemId, store *storage.Store, delta, runtime time.Duration) {
+	callback := systemCallbacks[systemId].Interface().(systemCallback[T])
+
+	access := newAccess(store)
+	callback(access, system.state, delta, runtime)
+	access.Close()
 }
 
 func (system System[T]) Add(schedule *scheduler.Schedule, state *T) {
