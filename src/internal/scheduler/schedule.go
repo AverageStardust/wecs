@@ -22,6 +22,26 @@ type systemRunner interface {
 	Run(systemId SystemId, store *storage.Store, delta, runtime time.Duration)
 }
 
+func NewSchedule(maxFrequency int, minFrequency int) *Schedule {
+	if minFrequency > maxFrequency {
+		minFrequency = maxFrequency
+	}
+
+	minDelta := time.Duration(1/maxFrequency) * time.Second
+	maxDelta := time.Duration(1/minFrequency) * time.Second
+
+	schedule := &Schedule{
+		ticker:       time.NewTicker(minDelta),
+		LastTime:     time.Now(),
+		RunTime:      time.Duration(0),
+		MinDelta:     minDelta,
+		MaxDelta:     maxDelta,
+		SystemStates: map[SystemId]systemRunner{},
+	}
+
+	return schedule
+}
+
 func (schedule *Schedule) run(store *storage.Store, time time.Time) {
 	delta := time.Sub(schedule.LastTime)
 	schedule.LastTime = time

@@ -65,18 +65,7 @@ func (scheduler *Scheduler) RunSystems(store *storage.Store) bool {
 }
 
 func (scheduler *Scheduler) NewSchedule(maxFrequency int, minFrequency int) *Schedule {
-	minDelta := time.Duration(1/maxFrequency) * time.Second
-	maxDelta := time.Duration(1/minFrequency) * time.Second
-
-	schedule := &Schedule{
-		ticker:       time.NewTicker(minDelta),
-		LastTime:     time.Now(),
-		RunTime:      time.Duration(0),
-		MinDelta:     minDelta,
-		MaxDelta:     maxDelta,
-		SystemStates: map[SystemId]systemRunner{},
-	}
-
+	schedule := NewSchedule(maxFrequency, minFrequency)
 	scheduler.Schedules = append(scheduler.Schedules, schedule)
 
 	return schedule
