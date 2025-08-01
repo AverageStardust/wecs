@@ -22,7 +22,7 @@ type systemRunner interface {
 	Run(systemId SystemId, store *storage.Store, delta, runtime time.Duration)
 }
 
-func NewSchedule(maxFrequency int, minFrequency int) *Schedule {
+func NewSchedule(maxFrequency float64, minFrequency float64) *Schedule {
 	if minFrequency > maxFrequency {
 		minFrequency = maxFrequency
 	}
