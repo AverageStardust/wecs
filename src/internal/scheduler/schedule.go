@@ -27,8 +27,8 @@ func NewSchedule(maxFrequency int, minFrequency int) *Schedule {
 		minFrequency = maxFrequency
 	}
 
-	minDelta := time.Duration(1/maxFrequency) * time.Second
-	maxDelta := time.Duration(1/minFrequency) * time.Second
+	minDelta := time.Second / time.Duration(maxFrequency)
+	maxDelta := time.Second / time.Duration(minFrequency)
 
 	schedule := &Schedule{
 		ticker:       time.NewTicker(minDelta),
