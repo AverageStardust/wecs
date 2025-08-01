@@ -12,7 +12,7 @@ import (
 
 func TestSystem(t *testing.T) {
 	scheduler := scheduler.NewScheduler()
-	schedule50hz := scheduler.NewSchedule(50, 50)
+	schedule50hz := scheduler.NewSchedule(50)
 
 	counterSystem := wecs.NewSystem(func(_ *wecs.Access, state *int, delta time.Duration, _ time.Duration) {
 		assert.InDelta(t, time.Millisecond*20, delta, float64(time.Nanosecond))
