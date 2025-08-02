@@ -32,7 +32,7 @@ func (bus *Bus[T]) NewPipe() *Pipe[T] {
 	}
 }
 
-func (bus *Bus[T]) Lister(listener func(event T)) {
+func (bus *Bus[T]) Listen(listener func(event T)) {
 	bus.listeners = append(bus.listeners, listener)
 }
 
@@ -69,22 +69,31 @@ func (bus *Bus[T]) dropConsumedQueue() {
 
 func (pipe *Pipe[T]) Iter() iter.Seq[T] {
 	return func(yield func(T) bool) {
-		count := uint64(0)
 		for {
 			event, success := pipe.bus.eventQueue.Peek(pipe.nextEvent)
 			if !success {
 				break
 			}
 
-			count++
+			pipe.nextEvent++
 			if !yield(event) {
 				break
 			}
 		}
 
-		pipe.nextEvent += count
 		pipe.bus.dropConsumedQueue()
 	}
+}
+
+func (pipe *Pipe[T]) Pop() (event T, success bool) {
+	event, success = pipe.bus.eventQueue.Peek(pipe.nextEvent)
+
+	if success {
+		pipe.nextEvent++
+		pipe.bus.dropConsumedQueue()
+	}
+
+	return
 }
 
 func (pipe *Pipe[T]) Close() {
