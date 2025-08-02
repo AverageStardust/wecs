@@ -107,26 +107,29 @@ func (ring *Ring[T]) grow() {
 	newCapacity := cap(ring.buffer) * 2
 	newBuffer := make([]T, newCapacity)
 
-	if ring.head > ring.tail {
-		tailIndex := ring.tail & (ring.mask())
-		headIndex := (ring.head-1)&(ring.mask()) + 1
-		newTailIndex := ring.tail & uint64(newCapacity-1)
-		newHeadIndex := (ring.head-1)&uint64(newCapacity-1) + 1
+	if ring.head == ring.tail {
+		ring.buffer = newBuffer
+		return
+	}
 
-		if tailIndex > headIndex || (tailIndex == headIndex && tailIndex != 0) {
-			if newTailIndex > newHeadIndex {
-				// source and destination looping around
-				copy(newBuffer[newTailIndex:newCapacity], ring.buffer[tailIndex:])
-				copy(newBuffer[:newHeadIndex], ring.buffer[:headIndex])
-			} else {
-				// only source looping around
-				copy(newBuffer[newTailIndex:cap(ring.buffer)], ring.buffer[tailIndex:])
-				copy(newBuffer[cap(ring.buffer):newHeadIndex], ring.buffer[:headIndex])
-			}
+	tailIndex := ring.tail & (ring.mask())
+	headIndex := (ring.head-1)&(ring.mask()) + 1
+	newTailIndex := ring.tail & uint64(newCapacity-1)
+	newHeadIndex := (ring.head-1)&uint64(newCapacity-1) + 1
+
+	if tailIndex > headIndex || (tailIndex == headIndex && tailIndex != 0) {
+		if newTailIndex > newHeadIndex {
+			// source and destination looping around
+			copy(newBuffer[newTailIndex:newCapacity], ring.buffer[tailIndex:])
+			copy(newBuffer[:newHeadIndex], ring.buffer[:headIndex])
 		} else {
-			// no looping around
-			copy(newBuffer[newTailIndex:newHeadIndex], ring.buffer[tailIndex:headIndex])
+			// only source looping around
+			copy(newBuffer[newTailIndex:cap(ring.buffer)], ring.buffer[tailIndex:])
+			copy(newBuffer[cap(ring.buffer):newHeadIndex], ring.buffer[:headIndex])
 		}
+	} else {
+		// no looping around
+		copy(newBuffer[newTailIndex:newHeadIndex], ring.buffer[tailIndex:headIndex])
 	}
 
 	ring.buffer = newBuffer
