@@ -12,15 +12,16 @@ import (
 
 func TestSystem(t *testing.T) {
 	scheduler := scheduler.NewScheduler()
-	schedule50hz := scheduler.NewSchedule(50, 50)
+	schedule := scheduler.NewSchedule(50, 50)
 
-	counterSystem := wecs.NewSystem(func(_ *wecs.Access, state *int, delta time.Duration, _ time.Duration) {
+	iterations := 0
+
+	counterSystem := wecs.NewSystem(struct{}{}, func(_ *wecs.Access, state *struct{}, delta time.Duration, _ time.Duration) {
 		assert.InDelta(t, time.Millisecond*20, delta, float64(time.Nanosecond))
-		*state++
+		iterations++
 	})
 
-	var counterState = 0
-	counterSystem.Add(schedule50hz, &counterState)
+	schedule.Add(counterSystem)
 
 	store := storage.NewStore()
 	go scheduler.RunSystems(store)
@@ -29,7 +30,7 @@ func TestSystem(t *testing.T) {
 
 	scheduler.StopSystems()
 
-	assert.InDelta(t, 10, counterState, 2)
-	assert.InDelta(t, time.Millisecond*200, schedule50hz.RunTime, float64(time.Millisecond*40))
-	assert.WithinRange(t, schedule50hz.LastTime, time.Now().Add(-time.Millisecond*50), time.Now())
+	assert.InDelta(t, 10, iterations, 2)
+	assert.InDelta(t, time.Millisecond*200, schedule.RunTime, float64(time.Millisecond*40))
+	assert.WithinRange(t, schedule.LastTime, time.Now().Add(-time.Millisecond*50), time.Now())
 }

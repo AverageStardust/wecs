@@ -11,10 +11,9 @@ import (
 	"github.com/averagestardust/wecs/internal/storage"
 )
 
-type System[T any] scheduler.SystemId
-
-type systemState[T any] struct {
+type System[T any] struct {
 	_     struct{} `cbor:",toarray"`
+	id    scheduler.SystemId
 	state *T
 }
 
@@ -22,40 +21,34 @@ type systemCallback[T any] func(access *Access, state *T, delta time.Duration, r
 
 var systemCallbacks []reflect.Value
 
-func NewSystem[T any](callback systemCallback[T]) System[T] {
-	systemId := System[T](len(systemCallbacks))
+func NewSystem[T any](state T, callback systemCallback[T]) System[T] {
+	systemId := scheduler.SystemId(len(systemCallbacks))
 	systemCallbacks = append(systemCallbacks, reflect.ValueOf(callback))
 
-	return systemId
+	return System[T]{
+		id:    systemId,
+		state: &state,
+	}
 }
 
-func (system systemState[T]) Run(systemId scheduler.SystemId, store *storage.Store, delta, runtime time.Duration) {
-	callback := systemCallbacks[systemId].Interface().(systemCallback[T])
+func (system System[T]) Run(store *storage.Store, delta, runtime time.Duration) {
+	callback := systemCallbacks[system.id].Interface().(systemCallback[T])
 
 	access := newAccess(store)
 	callback(access, system.state, delta, runtime)
 	access.Close()
 }
 
-func (system System[T]) Add(schedule *scheduler.Schedule, state *T) {
-	schedule.Systems[scheduler.SystemId(system)] = systemState[T]{state: state}
-}
-
-func (system System[T]) Delete(_schedule *scheduler.Schedule) {
-	delete(_schedule.Systems, scheduler.SystemId(system))
-}
-
-func (system System[T]) Has(schedule *scheduler.Schedule) bool {
-	_, hasSystem := schedule.Systems[scheduler.SystemId(system)]
-	return hasSystem
+func (system System[T]) Id() scheduler.SystemId {
+	return system.id
 }
 
 func hashUsedSystemCallbacks(schedules []*scheduler.Schedule) uint64 {
 	systemIds := map[scheduler.SystemId]struct{}{}
 
 	for _, schedule := range schedules {
-		for systemId := range schedule.Systems {
-			systemIds[systemId] = struct{}{}
+		for _, system := range schedule.Systems {
+			systemIds[system.Id()] = struct{}{}
 		}
 	}
 
