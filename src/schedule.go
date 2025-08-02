@@ -1,4 +1,4 @@
-package scheduler
+package main
 
 import (
 	"math"
@@ -7,7 +7,7 @@ import (
 	"github.com/averagestardust/wecs/internal/storage"
 )
 
-type SystemId uint32
+type systemId uint32
 
 type Schedule struct {
 	_        struct{} `cbor:",toarray"`
@@ -16,26 +16,21 @@ type Schedule struct {
 	RunTime  time.Duration
 	MinDelta time.Duration
 	MaxDelta time.Duration
-	Systems  []systemRunner
+	Systems  []System
 }
 
-type systemRunner interface {
-	Run(store *storage.Store, delta, runtime time.Duration)
-	Id() SystemId
-}
-
-func NewManuelSchedule() *Schedule {
+func newManuelSchedule() *Schedule {
 	return &Schedule{
 		ticker:   nil,
 		LastTime: time.Now(),
 		RunTime:  time.Duration(0),
 		MinDelta: time.Duration(0),
 		MaxDelta: time.Duration(math.MaxInt64),
-		Systems:  []systemRunner{},
+		Systems:  []System{},
 	}
 }
 
-func NewSchedule(maxFrequency float64, minFrequency float64) *Schedule {
+func newSchedule(maxFrequency float64, minFrequency float64) *Schedule {
 	if minFrequency > maxFrequency {
 		minFrequency = maxFrequency
 	}
@@ -49,13 +44,13 @@ func NewSchedule(maxFrequency float64, minFrequency float64) *Schedule {
 		RunTime:  time.Duration(0),
 		MinDelta: minDelta,
 		MaxDelta: maxDelta,
-		Systems:  []systemRunner{},
+		Systems:  []System{},
 	}
 
 	return schedule
 }
 
-func (schedule *Schedule) Run(store *storage.Store, time time.Time) {
+func (schedule *Schedule) run(store *storage.Store, time time.Time) {
 	delta := time.Sub(schedule.LastTime)
 	schedule.LastTime = time
 
@@ -64,40 +59,11 @@ func (schedule *Schedule) Run(store *storage.Store, time time.Time) {
 	schedule.RunTime += delta
 
 	for _, system := range schedule.Systems {
-		system.Run(store, delta, schedule.RunTime)
+		system.run(store, delta, schedule.RunTime)
 	}
 }
 
-func (schedule *Schedule) Delete(system systemRunner) {
-	keptRunners := []systemRunner{}
-	id := system.Id()
-
-	for _, runner := range schedule.Systems {
-		if id == runner.Id() {
-			keptRunners = append(keptRunners, runner)
-		}
-	}
-
-	schedule.Systems = keptRunners
-}
-
-func (schedule *Schedule) Has(system systemRunner) bool {
-	id := system.Id()
-
-	for _, runner := range schedule.Systems {
-		if id == runner.Id() {
-			return true
-		}
-	}
-
-	return false
-}
-
-func (schedule *Schedule) Add(system systemRunner) {
-	schedule.Systems = append(schedule.Systems, system)
-}
-
-func (schedule *Schedule) ResetTicker() {
+func (schedule *Schedule) resetTicker() {
 	schedule.ticker = time.NewTicker(schedule.MinDelta)
 	schedule.LastTime = time.Now()
 }

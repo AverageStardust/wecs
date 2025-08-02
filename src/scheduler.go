@@ -1,4 +1,4 @@
-package scheduler
+package main
 
 import (
 	"reflect"
@@ -7,20 +7,20 @@ import (
 	"github.com/averagestardust/wecs/internal/storage"
 )
 
-type Scheduler struct {
+type scheduler struct {
 	_         struct{} `cbor:",toarray"`
 	Schedules []*Schedule
 	exit      chan struct{}
 }
 
-func NewScheduler() *Scheduler {
-	return &Scheduler{
+func newScheduler() *scheduler {
+	return &scheduler{
 		Schedules: nil,
 		exit:      nil,
 	}
 }
 
-func (scheduler *Scheduler) StopSystems() bool {
+func (scheduler *scheduler) stop() bool {
 	if scheduler.exit != nil {
 		return false
 	}
@@ -31,7 +31,7 @@ func (scheduler *Scheduler) StopSystems() bool {
 	return true
 }
 
-func (scheduler *Scheduler) RunSystems(store *storage.Store) bool {
+func (scheduler *scheduler) run(store *storage.Store) bool {
 	if scheduler.exit != nil {
 		return false
 	}
@@ -56,7 +56,7 @@ func (scheduler *Scheduler) RunSystems(store *storage.Store) bool {
 		chosen, received, _ := reflect.Select(cases)
 		if chosen < len(schedules) {
 			time := received.Interface().(time.Time)
-			schedules[chosen].Run(store, time)
+			schedules[chosen].run(store, time)
 		} else {
 			// exit
 			return true
@@ -64,8 +64,15 @@ func (scheduler *Scheduler) RunSystems(store *storage.Store) bool {
 	}
 }
 
-func (scheduler *Scheduler) NewSchedule(maxFrequency float64, minFrequency float64) *Schedule {
-	schedule := NewSchedule(maxFrequency, minFrequency)
+func (scheduler *scheduler) newSchedule(maxFrequency float64, minFrequency float64) *Schedule {
+	schedule := newSchedule(maxFrequency, minFrequency)
+	scheduler.Schedules = append(scheduler.Schedules, schedule)
+
+	return schedule
+}
+
+func (scheduler *scheduler) newManuelSchedule() *Schedule {
+	schedule := newManuelSchedule()
 	scheduler.Schedules = append(scheduler.Schedules, schedule)
 
 	return schedule

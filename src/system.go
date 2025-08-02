@@ -7,48 +7,54 @@ import (
 	"time"
 
 	"github.com/averagestardust/wecs/internal/common"
-	"github.com/averagestardust/wecs/internal/scheduler"
 	"github.com/averagestardust/wecs/internal/storage"
 )
 
-type System[T any] struct {
-	_     struct{} `cbor:",toarray"`
-	id    scheduler.SystemId
-	state *T
+type System interface {
+	run(store *storage.Store, delta, runtime time.Duration)
+	id() systemId
+}
+
+type system[T any] struct {
+	_        struct{} `cbor:",toarray"`
+	systemId systemId
+	state    *T
 }
 
 type systemCallback[T any] func(access *Access, state *T, delta time.Duration, runtime time.Duration)
 
 var systemCallbacks []reflect.Value
 
-func NewSystem[T any](state T, callback systemCallback[T]) System[T] {
-	systemId := scheduler.SystemId(len(systemCallbacks))
+func NewSystem[T any](schedule *Schedule, state T, callback systemCallback[T]) {
+	systemId := systemId(len(systemCallbacks))
 	systemCallbacks = append(systemCallbacks, reflect.ValueOf(callback))
 
-	return System[T]{
-		id:    systemId,
-		state: &state,
+	system := system[T]{
+		systemId: systemId,
+		state:    &state,
 	}
+
+	schedule.Systems = append(schedule.Systems, system)
 }
 
-func (system System[T]) Run(store *storage.Store, delta, runtime time.Duration) {
-	callback := systemCallbacks[system.id].Interface().(systemCallback[T])
+func (system system[T]) run(store *storage.Store, delta, runtime time.Duration) {
+	callback := systemCallbacks[system.systemId].Interface().(systemCallback[T])
 
 	access := newAccess(store)
 	callback(access, system.state, delta, runtime)
 	access.Close()
 }
 
-func (system System[T]) Id() scheduler.SystemId {
-	return system.id
+func (system system[T]) id() systemId {
+	return system.systemId
 }
 
-func hashUsedSystemCallbacks(schedules []*scheduler.Schedule) uint64 {
-	systemIds := map[scheduler.SystemId]struct{}{}
+func hashUsedSystemCallbacks(schedules []*Schedule) uint64 {
+	systemIds := map[systemId]struct{}{}
 
 	for _, schedule := range schedules {
 		for _, system := range schedule.Systems {
-			systemIds[system.Id()] = struct{}{}
+			systemIds[system.id()] = struct{}{}
 		}
 	}
 
