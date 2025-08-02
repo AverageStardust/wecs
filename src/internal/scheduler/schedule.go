@@ -24,17 +24,16 @@ type systemRunner interface {
 	Id() SystemId
 }
 
-func NewSchedule(maxFrequency float64, minFrequency float64) *Schedule {
-	if maxFrequency == 0 {
-		return &Schedule{
-			ticker:   nil,
-			LastTime: time.Now(),
-			RunTime:  time.Duration(0),
-			MinDelta: 0,
-			MaxDelta: math.MaxInt64,
-			Systems:  []systemRunner{},
-		}
+func NewManuelSchedule() *Schedule {
+	return &Schedule{
+		ticker:   nil,
+		LastTime: time.Now(),
+		RunTime:  time.Duration(0),
+		MinDelta: time.Duration(0),
+		MaxDelta: time.Duration(math.MaxInt64),
+		Systems:  []systemRunner{},
 	}
+}
 
 func NewSchedule(maxFrequency float64, minFrequency float64) *Schedule {
 	if minFrequency > maxFrequency {

@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"io"
+	"time"
 
 	"github.com/averagestardust/wecs/internal/scheduler"
 	"github.com/averagestardust/wecs/internal/storage"
@@ -42,6 +43,14 @@ func (world *World) StopSystems() {
 
 func (world *World) RunSystems() {
 	world.scheduler.RunSystems(world.store)
+}
+
+func (world *World) StepSchedule(schedule *scheduler.Schedule) {
+	schedule.Run(world.store, time.Now())
+}
+
+func (world *World) NewManuelSchedule(frequency float64) *scheduler.Schedule {
+	return world.scheduler.NewSchedule(0, 0)
 }
 
 func (world *World) NewSchedule(frequency float64) *scheduler.Schedule {
