@@ -56,7 +56,7 @@ func (scheduler *Scheduler) RunSystems(store *storage.Store) bool {
 		chosen, received, _ := reflect.Select(cases)
 		if chosen < len(schedules) {
 			time := received.Interface().(time.Time)
-			schedules[chosen].run(store, time)
+			schedules[chosen].Run(store, time)
 		} else {
 			// exit
 			return true
@@ -64,14 +64,7 @@ func (scheduler *Scheduler) RunSystems(store *storage.Store) bool {
 	}
 }
 
-func (scheduler *Scheduler) NewSchedule(frequency float64) *Schedule {
-	schedule := NewSchedule(frequency, frequency)
-	scheduler.Schedules = append(scheduler.Schedules, schedule)
-
-	return schedule
-}
-
-func (scheduler *Scheduler) NewVariableSchedule(maxFrequency float64, minFrequency float64) *Schedule {
+func (scheduler *Scheduler) NewSchedule(maxFrequency float64, minFrequency float64) *Schedule {
 	schedule := NewSchedule(maxFrequency, minFrequency)
 	scheduler.Schedules = append(scheduler.Schedules, schedule)
 

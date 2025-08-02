@@ -45,11 +45,11 @@ func (world *World) RunSystems() {
 }
 
 func (world *World) NewSchedule(frequency float64) *scheduler.Schedule {
-	return world.scheduler.NewSchedule(frequency)
+	return world.scheduler.NewSchedule(frequency, frequency)
 }
 
 func (world *World) NewVariableSchedule(maxFrequency float64, minFrequency float64) *scheduler.Schedule {
-	return world.scheduler.NewVariableSchedule(maxFrequency, minFrequency)
+	return world.scheduler.NewSchedule(maxFrequency, minFrequency)
 }
 
 func (world *World) GetAccess(callback func(access *Access)) {

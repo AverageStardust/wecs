@@ -38,15 +38,15 @@ func (system systemState[T]) Run(systemId scheduler.SystemId, store *storage.Sto
 }
 
 func (system System[T]) Add(schedule *scheduler.Schedule, state *T) {
-	schedule.SystemStates[scheduler.SystemId(system)] = systemState[T]{state: state}
+	schedule.Systems[scheduler.SystemId(system)] = systemState[T]{state: state}
 }
 
 func (system System[T]) Delete(_schedule *scheduler.Schedule) {
-	delete(_schedule.SystemStates, scheduler.SystemId(system))
+	delete(_schedule.Systems, scheduler.SystemId(system))
 }
 
 func (system System[T]) Has(schedule *scheduler.Schedule) bool {
-	_, hasSystem := schedule.SystemStates[scheduler.SystemId(system)]
+	_, hasSystem := schedule.Systems[scheduler.SystemId(system)]
 	return hasSystem
 }
 
@@ -54,7 +54,7 @@ func hashUsedSystemCallbacks(schedules []*scheduler.Schedule) uint64 {
 	systemIds := map[scheduler.SystemId]struct{}{}
 
 	for _, schedule := range schedules {
-		for systemId := range schedule.SystemStates {
+		for systemId := range schedule.Systems {
 			systemIds[systemId] = struct{}{}
 		}
 	}
