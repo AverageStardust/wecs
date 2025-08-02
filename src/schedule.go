@@ -7,8 +7,6 @@ import (
 	"github.com/averagestardust/wecs/internal/storage"
 )
 
-type systemId uint32
-
 type Schedule struct {
 	_        struct{} `cbor:",toarray"`
 	ticker   *time.Ticker

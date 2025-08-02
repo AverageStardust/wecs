@@ -10,6 +10,8 @@ import (
 	"github.com/averagestardust/wecs/internal/storage"
 )
 
+type systemId uint32
+
 type System interface {
 	run(store *storage.Store, delta, runtime time.Duration)
 	id() systemId
@@ -24,13 +26,18 @@ type system[T any] struct {
 type systemCallback[T any] func(access *Access, state *T, delta time.Duration, runtime time.Duration)
 
 var systemCallbacks []reflect.Value
+var systemCallbackMap map[reflect.Value]systemId
 
 func NewSystem[T any](schedule *Schedule, state T, callback systemCallback[T]) {
-	systemId := systemId(len(systemCallbacks))
-	systemCallbacks = append(systemCallbacks, reflect.ValueOf(callback))
+	callbackValue := reflect.ValueOf(callback)
+	id, exists := systemCallbackMap[callbackValue]
+	if !exists {
+		id = systemId(len(systemCallbacks))
+		systemCallbacks = append(systemCallbacks, callbackValue)
+	}
 
 	system := system[T]{
-		systemId: systemId,
+		systemId: id,
 		state:    &state,
 	}
 
