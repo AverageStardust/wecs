@@ -37,11 +37,11 @@ func NewWorld() *World {
 	}
 }
 
-func (world *World) StopSystems() {
+func (world *World) StopSchedules() {
 	world.scheduler.StopSystems()
 }
 
-func (world *World) RunSystems() {
+func (world *World) RunSchedules() {
 	world.scheduler.RunSystems(world.store)
 }
 
