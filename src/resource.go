@@ -23,8 +23,13 @@ func NewResource[T any]() Resource[T] {
 	return resource
 }
 
-func (resource Resource[T]) Delete(store *storage.Store) {
+func (resource Resource[T]) Delete(store *storage.Store) (success bool) {
+	if !resource.Has(store) {
+		return false
+	}
+
 	delete(store.Resources, storage.ResourceId(resource))
+	return true
 }
 
 func (resourceId Resource[T]) Get(store *storage.Store) *T {
@@ -41,9 +46,14 @@ func (resource Resource[T]) Has(store *storage.Store) bool {
 	return exists
 }
 
-func (resource Resource[T]) Add(store *storage.Store) {
+func (resource Resource[T]) Add(store *storage.Store) (success bool) {
+	if resource.Has(store) {
+		return false
+	}
+
 	var t T
 	store.Resources[storage.ResourceId(resource)] = t
+	return true
 }
 
 func hashUsedResources(store *storage.Store) uint64 {
