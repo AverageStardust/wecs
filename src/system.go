@@ -28,7 +28,7 @@ type systemCallback[T any] func(access *Access, state *T, delta time.Duration, r
 var systemCallbacks []reflect.Value
 var systemCallbackMap map[reflect.Value]systemId
 
-func NewSystem[T any](schedule *Schedule, state T, callback systemCallback[T]) {
+func NewSystem[T any](schedule Schedule, state T, callback systemCallback[T]) {
 	callbackValue := reflect.ValueOf(callback)
 	id, exists := systemCallbackMap[callbackValue]
 	if !exists {
@@ -41,7 +41,7 @@ func NewSystem[T any](schedule *Schedule, state T, callback systemCallback[T]) {
 		state:    &state,
 	}
 
-	schedule.Systems = append(schedule.Systems, system)
+	schedule.appendSystem(system)
 }
 
 func (system system[T]) run(store *storage.Store, delta, runtime time.Duration) {
@@ -56,7 +56,7 @@ func (system system[T]) id() systemId {
 	return system.systemId
 }
 
-func hashUsedSystemCallbacks(schedules []*Schedule) uint64 {
+func hashUsedSystemCallbacks(schedules []*schedule) uint64 {
 	systemIds := map[systemId]struct{}{}
 
 	for _, schedule := range schedules {

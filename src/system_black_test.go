@@ -14,8 +14,9 @@ func TestSystem(t *testing.T) {
 
 	iterations := 0
 
-	wecs.NewSystem(schedule, struct{}{}, func(_ *wecs.Access, state *struct{}, delta time.Duration, _ time.Duration) {
+	wecs.NewSystem(schedule, struct{}{}, func(_ *wecs.Access, state *struct{}, delta time.Duration, runtime time.Duration) {
 		assert.InDelta(t, time.Millisecond*20, delta, float64(time.Nanosecond))
+		assert.InDelta(t, time.Millisecond*time.Duration(20*iterations), runtime, float64(time.Nanosecond))
 		iterations++
 	})
 
@@ -25,6 +26,4 @@ func TestSystem(t *testing.T) {
 	world.StopSchedules()
 
 	assert.InDelta(t, 10, iterations, 2)
-	assert.InDelta(t, time.Millisecond*200, schedule.RunTime, float64(time.Millisecond*40))
-	assert.WithinRange(t, schedule.LastTime, time.Now().Add(-time.Millisecond*50), time.Now())
 }

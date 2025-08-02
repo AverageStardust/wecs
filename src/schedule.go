@@ -7,7 +7,13 @@ import (
 	"github.com/averagestardust/wecs/internal/storage"
 )
 
-type Schedule struct {
+type Schedule interface {
+	appendSystem(system System)
+	run(store *storage.Store, time time.Time)
+	resetTicker()
+}
+
+type schedule struct {
 	_        struct{} `cbor:",toarray"`
 	ticker   *time.Ticker
 	LastTime time.Time
@@ -17,8 +23,8 @@ type Schedule struct {
 	Systems  []System
 }
 
-func newManuelSchedule() *Schedule {
-	return &Schedule{
+func newManuelSchedule() *schedule {
+	return &schedule{
 		ticker:   nil,
 		LastTime: time.Now(),
 		RunTime:  time.Duration(0),
@@ -28,7 +34,7 @@ func newManuelSchedule() *Schedule {
 	}
 }
 
-func newSchedule(maxFrequency float64, minFrequency float64) *Schedule {
+func newSchedule(maxFrequency float64, minFrequency float64) *schedule {
 	if minFrequency > maxFrequency {
 		minFrequency = maxFrequency
 	}
@@ -36,7 +42,7 @@ func newSchedule(maxFrequency float64, minFrequency float64) *Schedule {
 	minDelta := time.Second / time.Duration(maxFrequency)
 	maxDelta := time.Second / time.Duration(minFrequency)
 
-	schedule := &Schedule{
+	schedule := &schedule{
 		ticker:   time.NewTicker(minDelta),
 		LastTime: time.Now(),
 		RunTime:  time.Duration(0),
@@ -48,20 +54,25 @@ func newSchedule(maxFrequency float64, minFrequency float64) *Schedule {
 	return schedule
 }
 
-func (schedule *Schedule) run(store *storage.Store, time time.Time) {
+func (schedule *schedule) appendSystem(system System) {
+	schedule.Systems = append(schedule.Systems, system)
+}
+
+func (schedule *schedule) run(store *storage.Store, time time.Time) {
 	delta := time.Sub(schedule.LastTime)
 	schedule.LastTime = time
 
 	delta = max(delta, schedule.MinDelta)
 	delta = min(delta, schedule.MaxDelta)
-	schedule.RunTime += delta
 
 	for _, system := range schedule.Systems {
 		system.run(store, delta, schedule.RunTime)
 	}
+
+	schedule.RunTime += delta
 }
 
-func (schedule *Schedule) resetTicker() {
+func (schedule *schedule) resetTicker() {
 	schedule.ticker = time.NewTicker(schedule.MinDelta)
 	schedule.LastTime = time.Now()
 }

@@ -9,7 +9,7 @@ import (
 
 type scheduler struct {
 	_         struct{} `cbor:",toarray"`
-	Schedules []*Schedule
+	Schedules []*schedule
 	exit      chan struct{}
 }
 
@@ -64,14 +64,14 @@ func (scheduler *scheduler) run(store *storage.Store) bool {
 	}
 }
 
-func (scheduler *scheduler) newSchedule(maxFrequency float64, minFrequency float64) *Schedule {
+func (scheduler *scheduler) newSchedule(maxFrequency float64, minFrequency float64) *schedule {
 	schedule := newSchedule(maxFrequency, minFrequency)
 	scheduler.Schedules = append(scheduler.Schedules, schedule)
 
 	return schedule
 }
 
-func (scheduler *scheduler) newManuelSchedule() *Schedule {
+func (scheduler *scheduler) newManuelSchedule() *schedule {
 	schedule := newManuelSchedule()
 	scheduler.Schedules = append(scheduler.Schedules, schedule)
 

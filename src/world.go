@@ -44,19 +44,19 @@ func (world *World) RunSchedules() {
 	world.scheduler.run(world.store)
 }
 
-func (world *World) StepSchedule(schedule *Schedule) {
+func (world *World) StepSchedule(schedule Schedule) {
 	schedule.run(world.store, time.Now())
 }
 
-func (world *World) NewManuelSchedule(frequency float64) *Schedule {
+func (world *World) NewManuelSchedule(frequency float64) Schedule {
 	return world.scheduler.newManuelSchedule()
 }
 
-func (world *World) NewSchedule(frequency float64) *Schedule {
+func (world *World) NewSchedule(frequency float64) Schedule {
 	return world.scheduler.newSchedule(frequency, frequency)
 }
 
-func (world *World) NewVariableSchedule(maxFrequency float64, minFrequency float64) *Schedule {
+func (world *World) NewVariableSchedule(maxFrequency float64, minFrequency float64) Schedule {
 	return world.scheduler.newSchedule(maxFrequency, minFrequency)
 }
 
