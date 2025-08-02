@@ -46,7 +46,7 @@ func (component Component[T]) Add(access *Access, entity Entity) bool {
 
 func (component Component[T]) Query(access *Access, filter Filter) iter.Seq[*T] {
 	return func(yield func(*T) bool) {
-		for page := range filter.Filter(access.store) {
+		for page := range filter.filter(access.store) {
 			for bytes := range page.GetComponentIter(storage.PartId(component)) {
 				component := (*T)(unsafe.Pointer(&bytes))
 				if !yield(component) {

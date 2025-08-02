@@ -15,7 +15,7 @@ func NewPair[T any, U any](a Component[T], b Component[U]) Pair[T, U] {
 
 func (pair Pair[T, U]) Query(access *Access, filter Filter) iter.Seq2[*T, *U] {
 	return func(yield func(*T, *U) bool) {
-		for page := range filter.Filter(access.store) {
+		for page := range filter.filter(access.store) {
 			nextA, stopA := iter.Pull(page.GetComponentIter(pair[0]))
 			nextB, stopB := iter.Pull(page.GetComponentIter(pair[1]))
 			defer stopA()

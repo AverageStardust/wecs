@@ -37,7 +37,7 @@ func (access *Access) Exists(entity Entity) bool {
 
 func (access *Access) Query(filter Filter) iter.Seq[Entity] {
 	return func(yield func(Entity) bool) {
-		for page := range filter.Filter(access.store) {
+		for page := range filter.filter(access.store) {
 			for _, entity := range page.Access {
 				if !yield(Entity(entity)) {
 					return

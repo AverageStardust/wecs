@@ -57,7 +57,7 @@ func (filter Filter) Exclude(components ...storage.Part) Filter {
 	return filter
 }
 
-func (layers Filter) Filter(store *storage.Store) iter.Seq[*storage.Page] {
+func (layers Filter) filter(store *storage.Store) iter.Seq[*storage.Page] {
 	return func(yield func(page *storage.Page) bool) {
 	pageLoop:
 		for archetypeId, page := range store.Pages {
