@@ -8,8 +8,8 @@ type Tag storage.PartId
 
 var nextTag uint32 = ^uint32(0)
 
-func NewTag() Component[bool] {
-	tag := Component[bool](nextTag)
+func NewTag() Tag {
+	tag := Tag(nextTag)
 	nextTag--
 
 	return tag
