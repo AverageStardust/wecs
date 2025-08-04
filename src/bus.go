@@ -9,7 +9,7 @@ import (
 type Bus[T any] struct {
 	listeners  []func(event T)
 	pipes      []*Pipe[T]
-	eventQueue ring.Ring[T]
+	eventQueue *ring.Ring[T]
 }
 
 type Pipe[T any] struct {
@@ -19,9 +19,9 @@ type Pipe[T any] struct {
 
 func NewBus[T any]() Bus[T] {
 	return Bus[T]{
-		listeners:  []func(event T){},
-		pipes:      []*Pipe[T]{},
-		eventQueue: ring.Ring[T]{},
+		listeners:  nil,
+		pipes:      nil,
+		eventQueue: ring.NewRing[T](),
 	}
 }
 
