@@ -23,7 +23,7 @@ func NewPartType(partId PartId, typ reflect.Type) {
 	partBufferTypes[partId] = typ
 }
 
-func (store *Store) DeletePart(entity EntityId, part Part) bool {
+func (store *Store) DeletePart(entity EntityId, part Part) (success bool) {
 	entry, exists := store.Entries[entity]
 
 	if !exists {
@@ -52,7 +52,7 @@ func (store *Store) HasPart(entity EntityId, part Part) (has bool) {
 	return store.Archetypes[entry.ArchetypeId].ContainsSingle(part)
 }
 
-func (store *Store) AddPart(entity EntityId, part Part) bool {
+func (store *Store) AddPart(entity EntityId, part Part) (success bool) {
 	entry, exists := store.Entries[entity]
 
 	if !exists {

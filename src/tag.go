@@ -15,15 +15,15 @@ func NewTag() Tag {
 	return tag
 }
 
-func (tag Tag) Delete(access *Access, entity Entity) bool {
+func (tag Tag) Delete(access *Access, entity Entity) (success bool) {
 	return access.store.DeletePart(storage.EntityId(entity), tag)
 }
 
-func (tag Tag) Has(access *Access, entity Entity) bool {
+func (tag Tag) Has(access *Access, entity Entity) (has bool) {
 	return access.store.HasPart(storage.EntityId(entity), tag)
 }
 
-func (tag Tag) Add(access *Access, entity Entity) bool {
+func (tag Tag) Add(access *Access, entity Entity) (success bool) {
 	return access.store.AddPart(storage.EntityId(entity), tag)
 }
 
