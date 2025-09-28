@@ -8,48 +8,59 @@ import (
 	"github.com/averagestardust/wecs/internal/storage"
 )
 
-type Component[T any] storage.PartId
+// An integer uniquely identifying a component type.
+// Components store related data on an entity.
+type Component[Data any] storage.PartId
 
+// The next component id to be assigned when a component is created.
+// Increments from zero.
 var nextComponent storage.PartId = 0
 
-func NewComponent[T any]() Component[T] {
-	var t T
-	typ := reflect.TypeOf(t)
+// Create a new component type from a data type.
+// The data type should store related data and probably should be a struct.
+func NewComponent[Data any]() Component[Data] {
+	var data Data
+	typ := reflect.TypeOf(data)
 
 	storage.NewPartType(nextComponent, typ)
-	component := Component[T](nextComponent)
+	component := Component[Data](nextComponent)
 
 	nextComponent++
 	return component
 }
 
-func (component Component[T]) Delete(access *Access, entity Entity) bool {
+// Remove a component from an entity.
+func (component Component[Data]) Delete(access *Access, entity Entity) (success bool) {
 	return access.store.DeletePart(storage.EntityId(entity), component)
 }
 
-func (component Component[T]) Get(access *Access, entity Entity) *T {
+// Get the data of a component from an entity.
+func (component Component[Data]) Get(access *Access, entity Entity) (data *Data) {
 	bytes := access.store.GetComponent(storage.EntityId(entity), storage.PartId(component))
 	if bytes == nil {
 		return nil
 	}
 
-	return (*T)(unsafe.Pointer(&bytes[0]))
+	return (*Data)(unsafe.Pointer(&bytes[0]))
 }
 
-func (component Component[T]) Has(access *Access, entity Entity) bool {
+// Check if a entity has a component.
+func (component Component[Data]) Has(access *Access, entity Entity) (success bool) {
 	return access.store.HasPart(storage.EntityId(entity), component)
 }
 
-func (component Component[T]) Add(access *Access, entity Entity) bool {
+// Add a component with empty data to an entity.
+func (component Component[Data]) Add(access *Access, entity Entity) (success bool) {
 	return access.store.AddPart(storage.EntityId(entity), component)
 }
 
-func (component Component[T]) Query(access *Access, filter Filter) iter.Seq[*T] {
-	return func(yield func(*T) bool) {
+// Return an iterator of data from one component type from all entities that match a filter.
+func (component Component[Data]) Query(access *Access, filter Filter) iter.Seq[*Data] {
+	return func(yield func(*Data) bool) {
 		for page := range filter.filter(access.store) {
 			for bytes := range page.GetComponentIter(storage.PartId(component)) {
-				component := (*T)(unsafe.Pointer(&bytes))
-				if !yield(component) {
+				data := (*Data)(unsafe.Pointer(&bytes))
+				if !yield(data) {
 					return
 				}
 			}
@@ -57,6 +68,7 @@ func (component Component[T]) Query(access *Access, filter Filter) iter.Seq[*T] 
 	}
 }
 
-func (component Component[T]) PartId() storage.PartId {
+// Get the part id.
+func (component Component[Data]) PartId() storage.PartId {
 	return storage.PartId(component)
 }

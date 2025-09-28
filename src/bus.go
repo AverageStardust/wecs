@@ -6,37 +6,44 @@ import (
 	"github.com/averagestardust/wecs/internal/ring"
 )
 
-type Bus[T any] struct {
-	listeners  []func(event T)
-	pipes      []*Pipe[T]
-	eventQueue *ring.Ring[T]
+// A generic bus to pass events around the application.
+type Bus[Event any] struct {
+	listeners  []func(event Event)
+	pipes      []*Pipe[Event]
+	eventQueue *ring.Ring[Event]
 }
 
-type Pipe[T any] struct {
-	bus       *Bus[T]
+// A pipe that can consume events from a bus on it's own time.
+type Pipe[Event any] struct {
+	bus       *Bus[Event]
 	nextEvent uint64
 }
 
-func NewBus[T any]() Bus[T] {
-	return Bus[T]{
+// Create an event bus to pass events around the application.
+func NewBus[Event any]() Bus[Event] {
+	return Bus[Event]{
 		listeners:  nil,
 		pipes:      nil,
-		eventQueue: ring.NewRing[T](),
+		eventQueue: ring.NewRing[Event](),
 	}
 }
 
-func (bus *Bus[T]) NewPipe() *Pipe[T] {
-	return &Pipe[T]{
+// Create a pipe that can consume events from a bus on it's own time.
+// Once a bus has a pipe it must queue events until all pipes have consumed them.
+func (bus *Bus[Event]) NewPipe() *Pipe[Event] {
+	return &Pipe[Event]{
 		bus:       bus,
 		nextEvent: bus.eventQueue.Head(),
 	}
 }
 
-func (bus *Bus[T]) Listen(listener func(event T)) {
+// Add a listener to a bus that immediately is called when events are published.
+func (bus *Bus[Event]) Listen(listener func(event Event)) {
 	bus.listeners = append(bus.listeners, listener)
 }
 
-func (bus *Bus[T]) Publish(event T) {
+// Send a event over the bus
+func (bus *Bus[Event]) Publish(event Event) {
 	for _, subscriber := range bus.listeners {
 		subscriber(event)
 	}
@@ -46,7 +53,8 @@ func (bus *Bus[T]) Publish(event T) {
 	}
 }
 
-func (bus *Bus[T]) PublishBatch(events []T) {
+// Send multiple events over the bus
+func (bus *Bus[Event]) PublishBatch(events []Event) {
 	for _, subscriber := range bus.listeners {
 		for _, event := range events {
 			subscriber(event)
@@ -58,7 +66,8 @@ func (bus *Bus[T]) PublishBatch(events []T) {
 	}
 }
 
-func (bus *Bus[T]) dropConsumedQueue() {
+// Delete events that have been consumed by all pipes on the bus.
+func (bus *Bus[Event]) dropConsumedQueue() {
 	lastAccessibleEvent := bus.pipes[0].nextEvent
 	for _, pipe := range bus.pipes[1:] {
 		lastAccessibleEvent = min(lastAccessibleEvent, pipe.nextEvent)
@@ -67,8 +76,9 @@ func (bus *Bus[T]) dropConsumedQueue() {
 	bus.eventQueue.DropUntil(lastAccessibleEvent)
 }
 
-func (pipe *Pipe[T]) Iter() iter.Seq[T] {
-	return func(yield func(T) bool) {
+// Get an iterator of events queued on a pipe.
+func (pipe *Pipe[Event]) Iter() iter.Seq[Event] {
+	return func(yield func(Event) bool) {
 		for {
 			event, success := pipe.bus.eventQueue.Peek(pipe.nextEvent)
 			if !success {
@@ -76,16 +86,16 @@ func (pipe *Pipe[T]) Iter() iter.Seq[T] {
 			}
 
 			pipe.nextEvent++
+			pipe.bus.dropConsumedQueue()
 			if !yield(event) {
 				break
 			}
 		}
-
-		pipe.bus.dropConsumedQueue()
 	}
 }
 
-func (pipe *Pipe[T]) Pop() (event T, success bool) {
+// Get one event from a pipe.
+func (pipe *Pipe[Event]) Pop() (event Event, success bool) {
 	event, success = pipe.bus.eventQueue.Peek(pipe.nextEvent)
 
 	if success {
@@ -96,7 +106,9 @@ func (pipe *Pipe[T]) Pop() (event T, success bool) {
 	return
 }
 
-func (pipe *Pipe[T]) Close() {
+// Close a pipe when it is no longer needed.
+// This frees a bus to free unconsumed events.
+func (pipe *Pipe[Event]) Close() {
 	// find index
 	var index int
 	for i, otherPipe := range pipe.bus.pipes {
