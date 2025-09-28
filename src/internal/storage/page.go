@@ -14,8 +14,14 @@ type Page struct {
 }
 
 func (page *Page) GetComponentIter(componentId PartId) iter.Seq[[]byte] {
+	typ, success := partBufferTypes[componentId]
+
+	if !success {
+		// empty iterator if this page doesn't have that component
+		return func(yield func([]byte) bool) {}
+	}
+
 	buffer := page.PartBuffers[componentId]
-	typ := partBufferTypes[componentId]
 	typeSize := int(typ.Size())
 
 	return func(yield func([]byte) bool) {
