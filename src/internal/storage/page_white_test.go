@@ -62,7 +62,7 @@ func newTestPage(entityIds []EntityId, shortBuffer, integerBuffer []byte) *Page 
 			PartId(shortComponent):   shortBuffer,
 			PartId(integerComponent): integerBuffer,
 		},
-		Access:    entityIds,
+		Entities:  entityIds,
 		Size:      len(entityIds),
 		DirtySize: len(entityIds),
 	}
@@ -71,7 +71,7 @@ func newTestPage(entityIds []EntityId, shortBuffer, integerBuffer []byte) *Page 
 func readPage(Page *Page) []entityData {
 	entities := []entityData{}
 
-	for i, entity := range Page.Access {
+	for i, entity := range Page.Entities {
 		short := binary.LittleEndian.Uint16(Page.PartBuffers[0][i*2 : i*2+2])
 		integer := binary.LittleEndian.Uint32(Page.PartBuffers[1][i*4 : i*4+4])
 		entities = append(entities, entityData{entity, short, integer})

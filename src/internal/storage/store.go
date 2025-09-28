@@ -122,7 +122,7 @@ func (store *Store) Delete(entity EntityId) {
 	page := store.Pages[entry.ArchetypeId]
 
 	// move the entry of the last entity in the page to the deletion index
-	lastEntity := page.Access[len(page.Access)-1]
+	lastEntity := page.Entities[len(page.Entities)-1]
 	lastEntry := store.Entries[lastEntity]
 	lastEntry.Index = entry.Index
 	store.Entries[lastEntity] = lastEntry

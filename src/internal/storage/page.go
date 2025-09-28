@@ -8,7 +8,7 @@ import (
 type Page struct {
 	_           struct{} `cbor:",toarray"`
 	PartBuffers map[PartId][]byte
-	Access      []EntityId
+	Entities    []EntityId
 	DirtySize   int
 	Size        int
 }
@@ -31,13 +31,13 @@ func (page *Page) GetComponentIter(componentId PartId) iter.Seq[[]byte] {
 
 // deletes index in the page and moves last element to fill it's place
 func (page *Page) delete(index int) {
-	lastIndex := len(page.Access) - 1
+	lastIndex := len(page.Entities) - 1
 
 	// move the last entity to the deletion location
-	page.Access[index] = page.Access[lastIndex]
+	page.Entities[index] = page.Entities[lastIndex]
 
 	// delete the last entity
-	page.Access = page.Access[:lastIndex]
+	page.Entities = page.Entities[:lastIndex]
 
 	// last we must move all the components of the last entity
 	// now that the last element has been written over the removed element, we can shorten
@@ -78,11 +78,11 @@ func (page *Page) grow(n int, firstEntity EntityId) (firstIndex int) {
 		page.PartBuffers[componentId] = buffer
 	}
 
-	firstIndex = len(page.Access)
+	firstIndex = len(page.Entities)
 
 	// grow entity list
 	for i := range n {
-		page.Access = append(page.Access, firstEntity+EntityId(i))
+		page.Entities = append(page.Entities, firstEntity+EntityId(i))
 	}
 
 	page.Size += n

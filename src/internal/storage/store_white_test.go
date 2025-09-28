@@ -101,7 +101,7 @@ func TestStorageMove(t *testing.T) {
 		map[archetypeId]*Page{
 			1: {
 				PartBuffers: map[PartId][]byte{},
-				Access:      []EntityId{0},
+				Entities:    []EntityId{0},
 				Size:        1,
 				DirtySize:   1,
 			},
@@ -119,7 +119,7 @@ func TestStorageMove(t *testing.T) {
 			PartBuffers: map[PartId][]byte{
 				PartId(shortComponent): {34, 1},
 			},
-			Access:    []EntityId{2},
+			Entities:  []EntityId{2},
 			Size:      1,
 			DirtySize: 1,
 		},
@@ -131,7 +131,7 @@ func TestStorageMove(t *testing.T) {
 				PartId(shortComponent):   {78, 0},
 				PartId(integerComponent): {7, 0, 0, 0},
 			},
-			Access:    []EntityId{3},
+			Entities:  []EntityId{3},
 			Size:      1,
 			DirtySize: 2,
 		},
@@ -151,7 +151,7 @@ func TestStorageMove(t *testing.T) {
 	assert.EqualValues(t,
 		Page{
 			PartBuffers: map[PartId][]byte{},
-			Access:      []EntityId{},
+			Entities:    []EntityId{},
 			Size:        0,
 			DirtySize:   1,
 		},
