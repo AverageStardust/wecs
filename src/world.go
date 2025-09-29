@@ -29,6 +29,7 @@ var ErrIncompatibleParts = errors.New("can't deserialize because existing parts 
 var ErrIncompatibleResources = errors.New("can't deserialize because existing resources don't match save")
 var ErrIncompatibleVersion = errors.New("can't deserialize because current version is older than save")
 
+// Create a new world.
 func NewWorld() *World {
 	return &World{
 		store:     storage.NewStore(),
@@ -36,36 +37,45 @@ func NewWorld() *World {
 	}
 }
 
+// Stop all systems from running on a system.
 func (world *World) StopSchedules() {
 	world.scheduler.stop()
 }
 
+// Start running all systems on a system.
 func (world *World) RunSchedules() {
 	world.scheduler.run(world.store)
 }
 
+// Step a particular schedule on a world.
 func (world *World) StepSchedule(schedule Schedule) {
 	schedule.run(world.store, time.Now())
 }
 
-func (world *World) NewManuelSchedule(frequency float64) Schedule {
-	return world.scheduler.newManuelSchedule()
+// Create a new schedule that must be manual stepped using StepSchedule().
+func (world *World) NewManualSchedule(frequency float64) Schedule {
+	return world.scheduler.newManualSchedule()
 }
 
+// Create a new schedule that will automatically step it's systems itself.
 func (world *World) NewSchedule(frequency float64) Schedule {
 	return world.scheduler.newSchedule(frequency, frequency)
 }
 
+// Create a new schedule that will automatically step at a range of frequencies.
 func (world *World) NewVariableSchedule(maxFrequency float64, minFrequency float64) Schedule {
 	return world.scheduler.newSchedule(maxFrequency, minFrequency)
 }
 
+// Get access outside of a system to the world data.
 func (world *World) GetAccess(callback func(access *Access)) {
 	access := newAccess(world.store)
 	callback(access)
 	access.Close()
 }
 
+// Deserialize the content of the world, overwriting whatever entities are there.
+// Must already have components types, tag types, resource types and systems setup.
 func (world *World) Deserialize(version int, reader io.Reader) error {
 	save := &worldSave{}
 	err := cbor.NewDecoder(reader).Decode(save)
@@ -102,6 +112,7 @@ func (world *World) Deserialize(version int, reader io.Reader) error {
 	return nil
 }
 
+// Serialize the content of the world.
 func (world *World) Serialize(version int, writer io.Writer) error {
 	stopped := world.scheduler.stop()
 

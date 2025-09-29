@@ -7,12 +7,14 @@ import (
 	"github.com/averagestardust/wecs/internal/storage"
 )
 
+// A manager to run multiple schedules on a thread.
 type scheduler struct {
 	_         struct{} `cbor:",toarray"`
 	Schedules []*schedule
 	exit      chan struct{}
 }
 
+// Create a manager to run multiple schedules on a thread.
 func newScheduler() *scheduler {
 	return &scheduler{
 		Schedules: nil,
@@ -20,6 +22,7 @@ func newScheduler() *scheduler {
 	}
 }
 
+// Stop all schedules from running.
 func (scheduler *scheduler) stop() bool {
 	if scheduler.exit != nil {
 		return false
@@ -31,6 +34,7 @@ func (scheduler *scheduler) stop() bool {
 	return true
 }
 
+// Start all schedules running again.
 func (scheduler *scheduler) run(store *storage.Store) bool {
 	if scheduler.exit != nil {
 		return false
@@ -64,6 +68,7 @@ func (scheduler *scheduler) run(store *storage.Store) bool {
 	}
 }
 
+// Add a new schedule.
 func (scheduler *scheduler) newSchedule(maxFrequency float64, minFrequency float64) *schedule {
 	schedule := newSchedule(maxFrequency, minFrequency)
 	scheduler.Schedules = append(scheduler.Schedules, schedule)
@@ -71,8 +76,9 @@ func (scheduler *scheduler) newSchedule(maxFrequency float64, minFrequency float
 	return schedule
 }
 
-func (scheduler *scheduler) newManuelSchedule() *schedule {
-	schedule := newManuelSchedule()
+// Add a new schedule to be manually triggered.
+func (scheduler *scheduler) newManualSchedule() *schedule {
+	schedule := newManualSchedule()
 	scheduler.Schedules = append(scheduler.Schedules, schedule)
 
 	return schedule

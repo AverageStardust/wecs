@@ -7,6 +7,7 @@ import (
 	"github.com/averagestardust/wecs/internal/storage"
 )
 
+// A schedule to run a set of systems at some interval.
 type Schedule interface {
 	appendSystem(system System)
 	run(store *storage.Store, time time.Time)
@@ -23,7 +24,8 @@ type schedule struct {
 	Systems  []System
 }
 
-func newManuelSchedule() *schedule {
+// Create a schedule that will only be run manually.
+func newManualSchedule() *schedule {
 	return &schedule{
 		ticker:   nil,
 		LastTime: time.Now(),
@@ -34,6 +36,8 @@ func newManuelSchedule() *schedule {
 	}
 }
 
+// Create a schedule that will attempt to run at maxFrequency, and will not allow time to pass any slower than minFrequency.
+// If you want a constant time-step these arguments should be the same value.
 func newSchedule(maxFrequency float64, minFrequency float64) *schedule {
 	if minFrequency > maxFrequency {
 		minFrequency = maxFrequency
@@ -54,10 +58,12 @@ func newSchedule(maxFrequency float64, minFrequency float64) *schedule {
 	return schedule
 }
 
+// Add a system to the schedule.
 func (schedule *schedule) appendSystem(system System) {
 	schedule.Systems = append(schedule.Systems, system)
 }
 
+// Run the schedule.
 func (schedule *schedule) run(store *storage.Store, time time.Time) {
 	delta := time.Sub(schedule.LastTime)
 	schedule.LastTime = time
@@ -72,6 +78,7 @@ func (schedule *schedule) run(store *storage.Store, time time.Time) {
 	schedule.RunTime += delta
 }
 
+// Reset the timer for the schedule.
 func (schedule *schedule) resetTicker() {
 	schedule.ticker = time.NewTicker(schedule.MinDelta)
 	schedule.LastTime = time.Now()

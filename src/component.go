@@ -9,7 +9,8 @@ import (
 )
 
 // An integer uniquely identifying a component type.
-// Components store related data on an entity.
+// Components should store related data on an entity.
+// Should be created in a static order during world initialization.
 type Component[Data any] storage.PartId
 
 // The next component id to be assigned when a component is created.
@@ -17,7 +18,8 @@ type Component[Data any] storage.PartId
 var nextComponent storage.PartId = 0
 
 // Create a new component type from a data type.
-// The data type should store related data and probably should be a struct.
+// The data type should store related data, probably with a struct.
+// Should be used in a static order during world initialization.
 func NewComponent[Data any]() Component[Data] {
 	var data Data
 	typ := reflect.TypeOf(data)
