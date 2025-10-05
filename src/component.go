@@ -32,13 +32,13 @@ func NewComponent[Data any]() Component[Data] {
 }
 
 // Remove a component from an entity.
-func (component Component[Data]) Delete(access *Access, entity Entity) (success bool) {
-	return access.store.DeletePart(storage.EntityId(entity), component)
+func (component Component[Data]) Delete(world *World, entity Entity) (success bool) {
+	return world.store.DeletePart(storage.EntityId(entity), component)
 }
 
 // Get the data of a component from an entity.
-func (component Component[Data]) Get(access *Access, entity Entity) (data *Data) {
-	bytes := access.store.GetComponent(storage.EntityId(entity), storage.PartId(component))
+func (component Component[Data]) Get(world *World, entity Entity) (data *Data) {
+	bytes := world.store.GetComponent(storage.EntityId(entity), storage.PartId(component))
 	if bytes == nil {
 		return nil
 	}
@@ -47,19 +47,19 @@ func (component Component[Data]) Get(access *Access, entity Entity) (data *Data)
 }
 
 // Check if a entity has a component.
-func (component Component[Data]) Has(access *Access, entity Entity) (success bool) {
-	return access.store.HasPart(storage.EntityId(entity), component)
+func (component Component[Data]) Has(world *World, entity Entity) (success bool) {
+	return world.store.HasPart(storage.EntityId(entity), component)
 }
 
 // Add a component with empty data to an entity.
-func (component Component[Data]) Add(access *Access, entity Entity) (success bool) {
-	return access.store.AddPart(storage.EntityId(entity), component)
+func (component Component[Data]) Add(world *World, entity Entity) (success bool) {
+	return world.store.AddPart(storage.EntityId(entity), component)
 }
 
 // Return an iterator of data from one component type from all entities that match a filter.
-func (component Component[Data]) Query(access *Access, filter Filter) iter.Seq[*Data] {
+func (component Component[Data]) Query(world *World, filter Filter) iter.Seq[*Data] {
 	return func(yield func(*Data) bool) {
-		for page := range filter.filter(access.store) {
+		for page := range filter.filter(world.store) {
 			for bytes := range page.GetComponentIter(storage.PartId(component)) {
 				data := (*Data)(unsafe.Pointer(&bytes))
 				if !yield(data) {

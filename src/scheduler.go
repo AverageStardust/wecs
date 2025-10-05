@@ -3,8 +3,6 @@ package main
 import (
 	"reflect"
 	"time"
-
-	"github.com/averagestardust/wecs/internal/storage"
 )
 
 // A manager to run multiple schedules on a thread.
@@ -35,7 +33,7 @@ func (scheduler *scheduler) stop() bool {
 }
 
 // Start all schedules running again.
-func (scheduler *scheduler) run(store *storage.Store) bool {
+func (scheduler *scheduler) run(world *World) bool {
 	if scheduler.exit != nil {
 		return false
 	}
@@ -60,7 +58,7 @@ func (scheduler *scheduler) run(store *storage.Store) bool {
 		chosen, received, _ := reflect.Select(cases)
 		if chosen < len(schedules) {
 			time := received.Interface().(time.Time)
-			schedules[chosen].run(store, time)
+			schedules[chosen].run(world, time)
 		} else {
 			// exit
 			return true

@@ -16,9 +16,9 @@ func NewPair[T any, U any](a Component[T], b Component[U]) Pair[T, U] {
 }
 
 // Return an iterator of data from two component types from all entities that match a filter.
-func (pair Pair[T, U]) Query(access *Access, filter Filter) iter.Seq2[*T, *U] {
+func (pair Pair[T, U]) Query(world *World, filter Filter) iter.Seq2[*T, *U] {
 	return func(yield func(*T, *U) bool) {
-		for page := range filter.filter(access.store) {
+		for page := range filter.filter(world.store) {
 			nextA, stopA := iter.Pull(page.GetComponentIter(pair[0]))
 			nextB, stopB := iter.Pull(page.GetComponentIter(pair[1]))
 			defer stopA()

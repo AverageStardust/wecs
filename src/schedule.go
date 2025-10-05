@@ -3,14 +3,12 @@ package main
 import (
 	"math"
 	"time"
-
-	"github.com/averagestardust/wecs/internal/storage"
 )
 
 // A schedule to run a set of systems at some interval.
 type Schedule interface {
 	appendSystem(system System)
-	run(store *storage.Store, time time.Time)
+	run(world *World, time time.Time)
 	resetTicker()
 }
 
@@ -64,7 +62,7 @@ func (schedule *schedule) appendSystem(system System) {
 }
 
 // Run the schedule.
-func (schedule *schedule) run(store *storage.Store, time time.Time) {
+func (schedule *schedule) run(world *World, time time.Time) {
 	delta := time.Sub(schedule.LastTime)
 	schedule.LastTime = time
 
@@ -72,7 +70,7 @@ func (schedule *schedule) run(store *storage.Store, time time.Time) {
 	delta = min(delta, schedule.MaxDelta)
 
 	for _, system := range schedule.Systems {
-		system.run(store, delta, schedule.RunTime)
+		system.run(world, delta, schedule.RunTime)
 	}
 
 	schedule.RunTime += delta

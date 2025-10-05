@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/averagestardust/wecs/internal/common"
-	"github.com/averagestardust/wecs/internal/storage"
 )
 
 // An integer uniquely identifying a system callback.
@@ -15,7 +14,7 @@ type systemId uint32
 
 // An interface for systems that finds entities and manipulates their components.
 type System interface {
-	run(store *storage.Store, delta, runtime time.Duration)
+	run(world *World, delta, runtime time.Duration)
 	id() systemId
 }
 
@@ -27,7 +26,7 @@ type system[T any] struct {
 }
 
 // A function callback that runs a system.
-type systemCallback[T any] func(access *Access, state *T, delta time.Duration, runtime time.Duration)
+type systemCallback[T any] func(world *World, state *T, delta time.Duration, runtime time.Duration)
 
 // A list of callbacks for systems
 var systemCallbacks []reflect.Value
@@ -54,12 +53,10 @@ func NewSystem[T any](schedule Schedule, state T, callback systemCallback[T]) {
 }
 
 // Run a system using it's state.
-func (system system[T]) run(store *storage.Store, delta, runtime time.Duration) {
+func (system system[T]) run(world *World, delta, runtime time.Duration) {
 	callback := systemCallbacks[system.systemId].Interface().(systemCallback[T])
 
-	access := newAccess(store)
-	callback(access, system.state, delta, runtime)
-	access.Close()
+	callback(world, system.state, delta, runtime)
 }
 
 // Get the id of a system.

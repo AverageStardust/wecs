@@ -23,18 +23,18 @@ func NewTag() Tag {
 }
 
 // Remove a tag from an entity.
-func (tag Tag) Delete(access *Access, entity Entity) (success bool) {
-	return access.store.DeletePart(storage.EntityId(entity), tag)
+func (tag Tag) Delete(world *World, entity Entity) (success bool) {
+	return world.store.DeletePart(storage.EntityId(entity), tag)
 }
 
 // Check if an entity has a tag.
-func (tag Tag) Has(access *Access, entity Entity) (has bool) {
-	return access.store.HasPart(storage.EntityId(entity), tag)
+func (tag Tag) Has(world *World, entity Entity) (has bool) {
+	return world.store.HasPart(storage.EntityId(entity), tag)
 }
 
 // Add a tag to an entity.
-func (tag Tag) Add(access *Access, entity Entity) (success bool) {
-	return access.store.AddPart(storage.EntityId(entity), tag)
+func (tag Tag) Add(world *World, entity Entity) (success bool) {
+	return world.store.AddPart(storage.EntityId(entity), tag)
 }
 
 // Get the part id of a tag.
