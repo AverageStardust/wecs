@@ -8,7 +8,7 @@ import (
 )
 
 func TestAccessQuery(t *testing.T) {
-	world := wecs.NewWorld([]wecs.GenericResource{})
+	world := wecs.NewWorld()
 	Integer := wecs.NewComponent[uint32]()
 	Vector := wecs.NewComponent[struct {
 		x float32
@@ -25,7 +25,7 @@ func TestAccessQuery(t *testing.T) {
 }
 
 func TestAccessAlive(t *testing.T) {
-	world := wecs.NewWorld([]wecs.GenericResource{})
+	world := wecs.NewWorld()
 	Integer := wecs.NewComponent[uint32]()
 
 	fake := wecs.Entity(2304)
@@ -34,15 +34,15 @@ func TestAccessAlive(t *testing.T) {
 	entity := world.New(Integer)
 	assert.True(t, world.Alive(entity))
 
-	world.Delete(entity)
+	world.QueueDelete(entity)
 	assert.False(t, world.Alive(entity))
 
-	world.DeleteImmediately(entity)
+	world.Delete(entity)
 	assert.False(t, world.Alive(entity))
 }
 
 func TestAccessExists(t *testing.T) {
-	world := wecs.NewWorld([]wecs.GenericResource{})
+	world := wecs.NewWorld()
 	Integer := wecs.NewComponent[uint32]()
 
 	fake := wecs.Entity(2304)
@@ -51,22 +51,22 @@ func TestAccessExists(t *testing.T) {
 	entity := world.New(Integer)
 	assert.True(t, world.Exists(entity))
 
-	world.Delete(entity)
+	world.QueueDelete(entity)
 	assert.True(t, world.Exists(entity))
 
-	world.DeleteImmediately(entity)
+	world.Delete(entity)
 	assert.False(t, world.Exists(entity))
 }
 
-func TestAccessEmptyDeleteQueue(t *testing.T) {
-	world := wecs.NewWorld([]wecs.GenericResource{})
+func TestAccessEmptyQueueDelete(t *testing.T) {
+	world := wecs.NewWorld()
 	Integer := wecs.NewComponent[uint32]()
 
 	entity := world.New(Integer)
 	assert.True(t, world.Alive(entity))
 	assert.True(t, world.Exists(entity))
 
-	world.Delete(entity)
+	world.QueueDelete(entity)
 	assert.False(t, world.Alive(entity))
 	assert.True(t, world.Exists(entity))
 
@@ -76,14 +76,14 @@ func TestAccessEmptyDeleteQueue(t *testing.T) {
 }
 
 func TestAccessDelete(t *testing.T) {
-	world := wecs.NewWorld([]wecs.GenericResource{})
+	world := wecs.NewWorld()
 	Integer := wecs.NewComponent[uint32]()
 
 	entity := world.New(Integer)
 	assert.True(t, world.Alive(entity))
 	assert.True(t, world.Exists(entity))
 
-	world.Delete(entity)
+	world.QueueDelete(entity)
 	assert.False(t, world.Alive(entity))
 	assert.True(t, world.Exists(entity))
 
@@ -93,20 +93,20 @@ func TestAccessDelete(t *testing.T) {
 }
 
 func TestAccessDeleteImmediately(t *testing.T) {
-	world := wecs.NewWorld([]wecs.GenericResource{})
+	world := wecs.NewWorld()
 	Integer := wecs.NewComponent[uint32]()
 
 	entity := world.New(Integer)
 	assert.True(t, world.Alive(entity))
 	assert.True(t, world.Exists(entity))
 
-	world.DeleteImmediately(entity)
+	world.Delete(entity)
 	assert.False(t, world.Alive(entity))
 	assert.False(t, world.Exists(entity))
 }
 
 func TestAccessNew(t *testing.T) {
-	world := wecs.NewWorld([]wecs.GenericResource{})
+	world := wecs.NewWorld()
 	Integer := wecs.NewComponent[uint32]()
 	Vector := wecs.NewComponent[struct {
 		x float32
@@ -139,7 +139,7 @@ func TestAccessNew(t *testing.T) {
 }
 
 func TestAccessNewBatch(t *testing.T) {
-	world := wecs.NewWorld([]wecs.GenericResource{})
+	world := wecs.NewWorld()
 	Integer := wecs.NewComponent[uint32]()
 	Vector := wecs.NewComponent[struct {
 		x float32
