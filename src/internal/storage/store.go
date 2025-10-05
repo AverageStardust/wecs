@@ -18,7 +18,7 @@ type Store struct {
 	NextEntity   EntityId
 	NextTag      PartId
 	Pages        map[archetypeId]*Page
-	Resources    map[ResourceId]any
+	Resources    map[string]any
 }
 
 type entry struct {
@@ -27,7 +27,7 @@ type entry struct {
 	Index       int
 }
 
-func NewStore() *Store {
+func NewStore(resources map[string]any) *Store {
 	return &Store{
 		Archetypes:   nil,
 		ArchetypeMap: map[uint64]archetypeId{},
@@ -36,7 +36,7 @@ func NewStore() *Store {
 		Pages:        map[archetypeId]*Page{},
 		Mutex:        &sync.Mutex{},
 		NextEntity:   0,
-		Resources:    map[ResourceId]any{},
+		Resources:    resources,
 	}
 }
 

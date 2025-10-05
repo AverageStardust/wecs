@@ -17,7 +17,6 @@ type worldSave struct {
 	DeleteQueue  map[Entity]struct{}
 	CallbackHash uint64
 	PartHash     uint64
-	ResourceHash uint64
 	Version      int
 }
 
@@ -29,13 +28,19 @@ type World struct {
 
 var ErrIncompatibleCallbacks = errors.New("can't deserialize because existing system callbacks don't match save")
 var ErrIncompatibleParts = errors.New("can't deserialize because existing parts don't match save")
-var ErrIncompatibleResources = errors.New("can't deserialize because existing resources don't match save")
 var ErrIncompatibleVersion = errors.New("can't deserialize because current version is older than save")
 
 // Create a new world.
-func NewWorld() *World {
+func NewWorld(resourceTypes []GenericResource) *World {
+
+	resources := map[string]any{}
+
+	for _, resourceType := range resourceTypes {
+		resources[resourceType.Name()] = resourceType.Create()
+	}
+
 	return &World{
-		store:       storage.NewStore(),
+		store:       storage.NewStore(resources),
 		scheduler:   newScheduler(),
 		deleteQueue: map[Entity]struct{}{},
 	}
@@ -150,15 +155,13 @@ func (world *World) Deserialize(version int, reader io.Reader) error {
 		return ErrIncompatibleCallbacks
 	} else if save.PartHash != storage.HashUsedParts(world.store) {
 		return ErrIncompatibleParts
-	} else if save.ResourceHash != hashUsedResources(save.Store) {
-		return ErrIncompatibleResources
 	} else if save.Version > version {
 		return ErrIncompatibleVersion
 	}
 
 	stopped := world.scheduler.stop()
 
-	world.store = storage.NewStore()
+	world.store = storage.NewStore(map[string]any{})
 	world.store = save.Store
 	world.scheduler = newScheduler()
 	world.scheduler = save.Scheduler
@@ -187,7 +190,6 @@ func (world *World) Serialize(version int, writer io.Writer) error {
 		DeleteQueue:  world.deleteQueue,
 		CallbackHash: hashUsedSystemCallbacks(world.scheduler.Schedules),
 		PartHash:     storage.HashUsedParts(world.store),
-		ResourceHash: hashUsedResources(world.store),
 		Version:      version,
 	}
 

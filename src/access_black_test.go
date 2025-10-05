@@ -8,7 +8,7 @@ import (
 )
 
 func TestAccessQuery(t *testing.T) {
-	world := wecs.NewWorld()
+	world := wecs.NewWorld([]wecs.GenericResource{})
 	Integer := wecs.NewComponent[uint32]()
 	Vector := wecs.NewComponent[struct {
 		x float32
@@ -25,7 +25,7 @@ func TestAccessQuery(t *testing.T) {
 }
 
 func TestAccessAlive(t *testing.T) {
-	world := wecs.NewWorld()
+	world := wecs.NewWorld([]wecs.GenericResource{})
 	Integer := wecs.NewComponent[uint32]()
 
 	fake := wecs.Entity(2304)
@@ -42,7 +42,7 @@ func TestAccessAlive(t *testing.T) {
 }
 
 func TestAccessExists(t *testing.T) {
-	world := wecs.NewWorld()
+	world := wecs.NewWorld([]wecs.GenericResource{})
 	Integer := wecs.NewComponent[uint32]()
 
 	fake := wecs.Entity(2304)
@@ -59,7 +59,7 @@ func TestAccessExists(t *testing.T) {
 }
 
 func TestAccessEmptyDeleteQueue(t *testing.T) {
-	world := wecs.NewWorld()
+	world := wecs.NewWorld([]wecs.GenericResource{})
 	Integer := wecs.NewComponent[uint32]()
 
 	entity := world.New(Integer)
@@ -76,7 +76,7 @@ func TestAccessEmptyDeleteQueue(t *testing.T) {
 }
 
 func TestAccessDelete(t *testing.T) {
-	world := wecs.NewWorld()
+	world := wecs.NewWorld([]wecs.GenericResource{})
 	Integer := wecs.NewComponent[uint32]()
 
 	entity := world.New(Integer)
@@ -93,7 +93,7 @@ func TestAccessDelete(t *testing.T) {
 }
 
 func TestAccessDeleteImmediately(t *testing.T) {
-	world := wecs.NewWorld()
+	world := wecs.NewWorld([]wecs.GenericResource{})
 	Integer := wecs.NewComponent[uint32]()
 
 	entity := world.New(Integer)
@@ -106,7 +106,7 @@ func TestAccessDeleteImmediately(t *testing.T) {
 }
 
 func TestAccessNew(t *testing.T) {
-	world := wecs.NewWorld()
+	world := wecs.NewWorld([]wecs.GenericResource{})
 	Integer := wecs.NewComponent[uint32]()
 	Vector := wecs.NewComponent[struct {
 		x float32
@@ -139,7 +139,7 @@ func TestAccessNew(t *testing.T) {
 }
 
 func TestAccessNewBatch(t *testing.T) {
-	world := wecs.NewWorld()
+	world := wecs.NewWorld([]wecs.GenericResource{})
 	Integer := wecs.NewComponent[uint32]()
 	Vector := wecs.NewComponent[struct {
 		x float32

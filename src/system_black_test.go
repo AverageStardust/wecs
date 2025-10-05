@@ -9,7 +9,7 @@ import (
 )
 
 func TestSystem(t *testing.T) {
-	world := wecs.NewWorld()
+	world := wecs.NewWorld([]wecs.GenericResource{})
 	schedule := world.NewSchedule(50)
 
 	iterations := 0

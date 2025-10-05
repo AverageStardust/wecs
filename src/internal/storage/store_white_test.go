@@ -75,7 +75,7 @@ func TestStorageNewArchetype(t *testing.T) {
 	component1 := partMock(1)
 	component5 := partMock(5)
 
-	storage := NewStore()
+	storage := NewStore(map[string]any{})
 
 	assert.Equal(t, archetypeId(0), storage.NewArchetype([]Part{tag0}))
 	assert.Equal(t, archetypeId(1), storage.NewArchetype([]Part{tag2, component1}))
@@ -256,6 +256,6 @@ func newTestStore(entries map[EntityId]entry, Pages map[archetypeId]*Page, nextE
 		Pages:      Pages,
 		Mutex:      &sync.Mutex{},
 		NextEntity: nextEntity,
-		Resources:  map[ResourceId]any{},
+		Resources:  map[string]any{},
 	}
 }
