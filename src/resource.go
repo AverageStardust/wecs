@@ -32,7 +32,7 @@ func NewResource[T any]() (resourceType Resource[T]) {
 
 	_, duplicate := resourceTypeSet[name]
 	if duplicate {
-		log.Println("WARNING: resources must be unique, can't distinguish type resource of type \"" + name + "\"")
+		log.Println("WARNING: resources must be unique, can't distinguish resource of type \"" + name + "\"")
 	}
 
 	resourceTypeSet[name] = struct{}{}
