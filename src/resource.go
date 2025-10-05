@@ -1,6 +1,8 @@
 package main
 
 import (
+	"reflect"
+
 	"github.com/averagestardust/wecs/internal/storage"
 )
 
@@ -13,7 +15,17 @@ type Resource[T any] struct {
 	name string
 }
 
-func NewResource[T any](name string, version int) Resource[T] {
+func NewResource[T any]() Resource[T] {
+	var t T
+	var typ = reflect.TypeOf(t)
+	var name string
+
+	if typ.PkgPath() != "" {
+		name = typ.PkgPath() + "." + typ.Name()
+	} else {
+		name = typ.String()
+	}
+
 	return Resource[T]{
 		name,
 	}
