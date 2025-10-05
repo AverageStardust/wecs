@@ -1,6 +1,10 @@
 package main
 
 import (
+<<<<<<< HEAD
+=======
+	"log"
+>>>>>>> 0809119 (simplify resource names)
 	"reflect"
 
 	"github.com/averagestardust/wecs/internal/storage"
@@ -15,17 +19,38 @@ type Resource[T any] struct {
 	name string
 }
 
+<<<<<<< HEAD
 func NewResource[T any]() Resource[T] {
 	var t T
 	var typ = reflect.TypeOf(t)
 	var name string
 
+=======
+// a set of resource types
+var resourceTypeSet = map[string]struct{}{}
+
+func NewResource[T any]() (resourceType Resource[T]) {
+	var t T
+	var typ = reflect.TypeOf(t)
+
+	var name string
+>>>>>>> 0809119 (simplify resource names)
 	if typ.PkgPath() != "" {
 		name = typ.PkgPath() + "." + typ.Name()
 	} else {
 		name = typ.String()
 	}
 
+<<<<<<< HEAD
+=======
+	_, duplicate := resourceTypeSet[name]
+	if duplicate {
+		log.Println("WARNING: resources must have unique, can't distinguish type resource of type \"" + name + "\"")
+	}
+
+	resourceTypeSet[typ] = struct{}{}
+
+>>>>>>> 0809119 (simplify resource names)
 	return Resource[T]{
 		name,
 	}
