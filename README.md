@@ -1,1 +1,1 @@
-I had a Jimmy Neutron style brain blast, and I am currently re-writing everything. I'll probably replace this repo once it's public.
+I made this because all the other Go ECSs have either A: ugly clunky APIs or B: a total lack of serialization. This was my first time writing an ECS and parts are *very* hacky. I am currently re-writing everything. I'll probably replace/archivethis repo once I'm done.
